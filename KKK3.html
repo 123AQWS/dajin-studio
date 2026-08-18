@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>大金·FREE Studio</title>
+  <style>
+    /* ============================================
+       【修改指南】
+       1. 商家信息（店名/电话/微信/地址）：搜索"【商家信息】"约在第 920 行附近
+       2. 价格数字：搜索"【价格配置】"约在第 970 行附近  
+       3. 作品图片：请将图片放在与HTML同级的 images 文件夹中
+          男士作品：images/nan-shi-1.jpg ~ nan-shi-10.jpg
+          女士作品：images/nv-shi-1.jpg ~ nv-shi-10.jpg
+          染发参考：images/ran-fa-1.jpg ~ ran-fa-12.jpg
+       4. 商家查看密码：搜索"【商家密码】"约在第 1120 行附近，默认 1410
+       5. 发型项目列表：搜索"【男士发型】" / "【女士发型】" / "【染发发型】"约第 1150 行附近修改数组
+       ============================================ */
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    :root {
+      --bg-deep: #050505;
+      --bg-dark: #0a0a0a;
+      --bg-card: #1a1a1a;
+      --bg-card-hover: #252525;
+      --text-white: #ffffff;
+      --text-gray: rgba(255,255,255,0.6);
+      --text-muted: rgba(255,255,255,0.4);
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --accent-gold: #c9a96e;
+      --ease-smooth: cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-white);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ===== 页面层基础 ===== */
+    .page {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.75);
+      filter: blur(6px);
+      transition: all 0.5s var(--ease-smooth);
+      z-index: 1;
+    }
+
+    .page.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: scale(1);
+      filter: blur(0);
+      z-index: 10;
+    }
+
+    .page.exit {
+      opacity: 0;
+      transform: scale(1.05);
+      filter: blur(3px);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* ===== 第一层：封面页 ===== */
+    .cover-page {
+      z-index: 100;
+      background: 
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px),
+        radial-gradient(ellipse at center, #1a1a1a 0%, #0f0f0f 40%, #050505 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .cover-page .cover-content {
+      text-align: center;
+      opacity: 0;
+      filter: blur(10px);
+      transform: scale(0.9);
+      transition: all 2s ease-out;
+    }
+
+    .cover-page.loaded .cover-content {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+
+    .cover-title {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      color: var(--text-white);
+      margin-bottom: 0.5rem;
+    }
+
+    .cover-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-gray);
+      letter-spacing: 0.1em;
+      margin-bottom: 3rem;
+    }
+
+    .cover-arrow-wrap {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .cover-page.loaded .cover-arrow-wrap {
+      opacity: 1;
+      transition-delay: 0.8s;
+    }
+
+    .cover-arrow {
+      width: 24px;
+      height: 24px;
+      animation: floatArrow 2s ease-in-out infinite;
+    }
+
+    @keyframes floatArrow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(12px); }
+    }
+
+    .cover-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .cover-page:hover .cover-content {
+      transform: scale(1.02);
+    }
+
+    .cover-page.loaded:hover .cover-content {
+      transform: scale(1.02);
+    }
+
+    @media (min-width: 768px) {
+      .cover-title { font-size: 4rem; }
+    }
+
+    /* ===== 第二层：主页 ===== */
+    .home-page {
+      background: var(--bg-dark);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .home-header {
+      text-align: center;
+      padding: 2rem 0 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-gray);
+      letter-spacing: 0.1em;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.5s var(--ease-smooth) 0.1s;
+    }
+
+    .home-page.active .home-header {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 0 0 40px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+      align-content: center;
+    }
+
+    .home-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 32px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.75);
+      filter: blur(8px);
+      transition: all 0.6s var(--ease-smooth);
+    }
+
+    .home-page.active .home-block:nth-child(1) { transition-delay: 0s; opacity: 1; transform: scale(1); filter: blur(0); }
+    .home-page.active .home-block:nth-child(2) { transition-delay: 0.12s; opacity: 1; transform: scale(1); filter: blur(0); }
+    .home-page.active .home-block:nth-child(3) { transition-delay: 0.24s; opacity: 1; transform: scale(1); filter: blur(0); }
+    .home-page.active .home-block:nth-child(4) { transition-delay: 0.36s; opacity: 1; transform: scale(1); filter: blur(0); }
+
+    .home-block:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-6px) scale(1.02);
+    }
+
+    .home-block:active {
+      transform: scale(0.96);
+    }
+
+    .home-block svg {
+      width: 36px;
+      height: 36px;
+      stroke: var(--text-white);
+      stroke-width: 1.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .home-block-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-white);
+    }
+
+    .home-block-en {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== 第三层：详情页通用 ===== */
+    .detail-page {
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+
+    .detail-header {
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #f0f0f0;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .back-btn {
+      position: absolute;
+      left: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      color: #1a1a1a;
+    }
+
+    .back-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: #1a1a1a;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .detail-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .detail-body {
+      padding: 40px 24px 80px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ===== 店铺介绍页 ===== */
+    .about-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #eee;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #e0e0e0;
+      overflow: hidden;
+    }
+
+    .about-avatar svg {
+      width: 48px;
+      height: 48px;
+      stroke: #bbb;
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .about-name {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+    }
+
+    .about-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .about-tag {
+      padding: 6px 16px;
+      background: #f0f0f0;
+      color: #555;
+      border-radius: 999px;
+      font-size: 0.8rem;
+    }
+
+    .about-bio {
+      text-align: center;
+      line-height: 1.8;
+      color: #666;
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+
+    .contact-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .contact-item:last-child { border-bottom: none; }
+
+    .contact-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: #999;
+      stroke-width: 1.5;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .contact-label {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 2px;
+    }
+
+    .contact-value {
+      font-size: 0.95rem;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    .contact-value a {
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+
+    .copy-btn {
+      margin-left: auto;
+      padding: 4px 12px;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover { background: #eee; }
+    .copy-btn.copied { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+    .about-tip {
+      background: #faf8f3;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #8a7e66;
+      line-height: 1.6;
+    }
+
+    /* ===== 价格服务页 ===== */
+    .price-section {
+      margin-bottom: 40px;
+    }
+
+    .price-section-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+
+    .price-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .price-cards { grid-template-columns: 1fr; }
+    }
+
+    .price-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .price-card:hover {
+      border-color: #ccc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .price-num {
+      font-size: 2rem;
+      font-weight: 300;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .price-desc {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .price-note {
+      font-size: 0.8rem;
+      color: #aaa;
+      padding-left: 4px;
+    }
+
+    .price-warning {
+      background: #fff8e1;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.9rem;
+      color: #8a7e50;
+      line-height: 1.5;
+      margin-top: 32px;
+    }
+
+    /* ===== 作品展示页 ===== */
+    .works-page { background: #111; color: #fff; }
+    .works-page .detail-header { background: rgba(17,17,17,0.95); border-bottom: 1px solid #222; }
+    .works-page .detail-title { color: #fff; }
+    .works-page .back-btn svg { stroke: #fff; }
+
+    .works-selector {
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      height: calc(100% - 60px);
+      justify-content: center;
+    }
+
+    .gender-btn {
+      flex: 1;
+      border: none;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 32px;
+      min-height: 120px;
+    }
+
+    .gender-btn.male { background: #1a1a1a; }
+    .gender-btn.female { background: #2a2a2a; }
+    .gender-btn.dye { 
+      background: linear-gradient(135deg, #2d1b1b 0%, #4a2525 100%);
+      border: 1px solid rgba(200,150,150,0.15);
+    }
+    .gender-btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+    .gender-btn:active { transform: scale(0.98); }
+
+    .gender-btn svg {
+      width: 48px;
+      height: 48px;
+      stroke: rgba(255,255,255,0.6);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .works-content {
+      display: none;
+      padding: 20px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .works-tabs {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #333;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 1rem;
+      padding: 12px 4px;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.3s;
+    }
+
+    .tab-btn.active { color: #fff; }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .selected-hint {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .selected-hint.show { display: flex; }
+
+    .dye-intro {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #aaa;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .dye-intro.show { display: block; }
+    .dye-intro strong { color: #fff; font-weight: 500; }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .work-card {
+      background: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .work-card:hover { transform: translateY(-4px); }
+
+    .work-img {
+      aspect-ratio: 1;
+      background: #252525;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .work-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0; left: 0;
+      opacity: 0;
+      transition: opacity 0.4s;
+      z-index: 2;
+    }
+
+    .work-img img.loaded { opacity: 1; }
+
+    .img-placeholder {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      gap: 8px;
+      z-index: 1;
+    }
+
+    .img-placeholder svg {
+      width: 32px;
+      height: 32px;
+      stroke: #555;
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .img-placeholder span {
+      font-size: 0.75rem;
+      color: #555;
+    }
+
+    .img-placeholder.interactive {
+      background: #1f1f1f;
+      border: 2px dashed #444;
+    }
+
+    .img-placeholder.interactive svg {
+      stroke: #888;
+      width: 36px;
+      height: 36px;
+    }
+
+    .img-placeholder.interactive span {
+      color: #888;
+      font-size: 0.7rem;
+      max-width: 80%;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .work-info {
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .work-name {
+      font-size: 0.9rem;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .select-btn {
+      padding: 6px 12px;
+      border: 1px solid #444;
+      background: transparent;
+      color: #aaa;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .select-btn:hover { border-color: #666; color: #fff; }
+    .select-btn.selected {
+      background: #fff;
+      color: #111;
+      border-color: #fff;
+    }
+
+    /* ===== 预约服务页 ===== */
+    .book-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #ddd;
+      padding: 12px 4px;
+      font-size: 1rem;
+      color: #1a1a1a;
+      background: transparent;
+      outline: none;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-bottom-color: #1a1a1a;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: #999;
+    }
+
+    .selected-style-card {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 12px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .selected-style-card.show { display: flex; }
+
+    .reselect-btn {
+      font-size: 0.8rem;
+      color: #666;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .submit-btn {
+      width: 200px;
+      margin: 20px auto 0;
+      padding: 14px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .submit-btn:hover { transform: scale(1.03); }
+    .submit-btn:active { transform: scale(0.98); }
+
+    .admin-entry {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .admin-link {
+      font-size: 0.75rem;
+      color: #ccc;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* ===== 模态框 ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+
+    .modal-text {
+      font-size: 0.95rem;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-btn {
+      padding: 10px 32px;
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .password-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 16px;
+      outline: none;
+    }
+
+    .password-input:focus { border-color: #1a1a1a; }
+
+    /* ===== 预约记录页 ===== */
+    .records-page { background: #f5f5f5; }
+    .records-page .detail-header { background: rgba(245,245,245,0.95); }
+
+    .record-card {
+      position: relative;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid transparent;
+    }
+
+    .record-card.duplicate-date {
+      border: 2px solid #e74c3c;
+      box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.06);
+    }
+
+    .dup-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .record-field {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .record-field:last-child { border-bottom: none; }
+    .record-label { color: #999; }
+    .record-value { color: #1a1a1a; font-weight: 500; }
+    .record-value.hairstyle { color: #c9a96e; }
+
+    .records-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #666;
+    }
+
+    .action-btn.danger {
+      color: #c44;
+      border-color: #fcc;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      z-index: 300;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== 第一层：封面页 ===== -->
+  <div id="cover-page" class="page cover-page active">
+    <div class="cover-content">
+      <div class="cover-title">大金·FREE Studio</div>
+      <div class="cover-subtitle">自由美发设计工作室</div>
+      <div class="cover-arrow-wrap">
+        <svg class="cover-arrow" viewBox="0 0 24 24">
+          <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+        <div class="cover-hint">点击查看详情</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第二层：主页 ===== -->
+  <div id="home-page" class="page home-page">
+    <div class="home-header">大金·FREE Studio</div>
+    <div class="home-grid">
+      <div class="home-block" data-target="about-page">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div class="home-block-title">店铺介绍</div>
+        <div class="home-block-en">About</div>
+      </div>
+      <div class="home-block" data-target="price-page">
+        <svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><path d="M8 8l-2 2M16 16l-2 2M14 6l8 8M6 14l8 8"/></svg>
+        <div class="home-block-title">价格服务</div>
+        <div class="home-block-en">Price</div>
+      </div>
+      <div class="home-block" data-target="works-page">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <div class="home-block-title">作品展示</div>
+        <div class="home-block-en">Works</div>
+      </div>
+      <div class="home-block" data-target="book-page">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div class="home-block-title">预约服务</div>
+        <div class="home-block-en">Book</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第三层：店铺介绍 ===== -->
+  <div id="about-page" class="page detail-page">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="detail-title">店铺介绍</div>
+    </div>
+    <div class="detail-body">
+      <div class="about-avatar">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+      <div class="about-name">葡萄</div>
+      <div class="about-tags">
+        <span class="about-tag">独立主理人</span>
+        <span class="about-tag">一对一服务</span>
+        <span class="about-tag">限量接待</span>
+      </div>
+      <div class="about-bio">
+        葡萄独立经营本工作室，从沟通到操作全程亲自完成，不转手。工作求精不求快，每日限量接待。营业时间随预约灵活安排，建议提前1天预约确认。
+      </div>
+      
+      <div class="contact-card">
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <div>
+            <div class="contact-label">地址</div>
+            <div class="contact-value">龙城时代大厦14楼1410</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <div>
+            <div class="contact-label">电话</div>
+            <div class="contact-value"><a href="tel:18364708336">18364708336</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <div>
+            <div class="contact-label">微信</div>
+            <div class="contact-value">J1998789</div>
+          </div>
+          <button class="copy-btn" onclick="copyWechat(this)">复制</button>
+        </div>
+        <div class="contact-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>
+            <div class="contact-label">营业时间</div>
+            <div class="contact-value" style="font-weight:400; color:#666;">单人经营，时间不固定，建议提前预约确认</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-tip">
+        建议提前1天预约，当日预约视情况而定
+      </div>
+      <!-- 到店指引 -->
+      <div style="background:#fff; border:1px solid #eee; border-radius:16px; padding:24px; margin-top:20px;">
+        <div style="font-size:1.1rem; font-weight:500; color:#1a1a1a; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          详细位置 · 到店指引
+        </div>
+        
+        <div style="border-radius:12px; overflow:hidden; background:#f5f5f5;">
+          <img src="images/route.jpg" alt="到店路线图" 
+               style="width:100%; display:block; min-height:180px; object-fit:cover;" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div style="display:none; align-items:center; justify-content:center; flex-direction:column; gap:8px; padding:40px; color:#999; font-size:0.85rem;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            请将路线图放入 images 文件夹并重命名为 route.jpg
+          </div>
+        </div>
+        
+        <p style="font-size:0.85rem; color:#888; line-height:1.6; margin-top:12px;">
+          建议从龙城时代大厦正门进入，乘坐电梯至14楼，出电梯后右转即达1410室。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第三层：价格服务 ===== -->
+  <div id="price-page" class="page detail-page">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="detail-title">价格服务</div>
+    </div>
+    <div class="detail-body">
+      <div style="text-align:center; margin-bottom:40px;">
+        <h2 style="font-size:1.5rem; font-weight:500; color:#1a1a1a;">服务项目与参考价格</h2>
+      </div>
+
+      <div class="price-section">
+        <div class="price-section-title">剪发设计</div>
+        <div class="price-cards">
+          <div class="price-card"><div class="price-num">¥100</div><div class="price-desc">快速修剪</div></div>
+          <div class="price-card"><div class="price-num">¥300</div><div class="price-desc">精剪设计</div></div>
+          <div class="price-card"><div class="price-num">¥500</div><div class="price-desc">总监定制</div></div>
+        </div>
+        <div class="price-note">具体价格以到店评估为准</div>
+      </div>
+
+      <div class="price-section">
+        <div class="price-section-title">烫染造型</div>
+        <div class="price-cards">
+          <div class="price-card"><div class="price-num">¥100</div><div class="price-desc">基础烫发</div></div>
+          <div class="price-card"><div class="price-num">¥300</div><div class="price-desc">进阶造型</div></div>
+          <div class="price-card"><div class="price-num">¥500</div><div class="price-desc">高端定制</div></div>
+        </div>
+        <div class="price-note">具体价格以到店评估为准</div>
+      </div>
+
+      <div class="price-section">
+        <div class="price-section-title">染发护理</div>
+        <div class="price-cards">
+          <div class="price-card"><div class="price-num">¥100</div><div class="price-desc">基础染发</div></div>
+          <div class="price-card"><div class="price-num">¥300</div><div class="price-desc">进阶染发</div></div>
+          <div class="price-card"><div class="price-num">¥500</div><div class="price-desc">高端护理</div></div>
+        </div>
+        <div class="price-note">具体价格以到店评估为准</div>
+      </div>
+
+      <div class="price-warning">
+        因单人全程操作，烫染耗时约2-4小时，请务必提前预约
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 第三层：作品展示 ===== -->
+  <div id="works-page" class="page detail-page works-page">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="detail-title">作品展示</div>
+    </div>
+
+    <!-- 分区选择入口 -->
+    <div id="works-selector" class="works-selector">
+      <button class="gender-btn male" onclick="enterWorks('male')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="3"/><path d="M12 7v10M8 11l4-4 4 4"/></svg>
+        男士作品
+      </button>
+      <button class="gender-btn female" onclick="enterWorks('female')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="3"/><path d="M12 7v14M9 18l3 3 3-3"/></svg>
+        女士作品
+      </button>
+      <button class="gender-btn dye" onclick="enterWorks('dye')">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.82 0 3.53-.5 5-1.35-2.99-1.73-5-4.96-5-8.65s2.01-6.92 5-8.65A9.89 9.89 0 0 0 12 2z"/><circle cx="12" cy="12" r="3"/></svg>
+        染发参考
+      </button>
+    </div>
+
+    <!-- 作品分区内容 -->
+    <div id="works-content" class="works-content">
+      <div class="works-tabs">
+        <button class="tab-btn active" data-tab="male" onclick="switchTab('male')">男士</button>
+        <button class="tab-btn" data-tab="female" onclick="switchTab('female')">女士</button>
+        <button class="tab-btn" data-tab="dye" onclick="switchTab('dye')">染发参考</button>
+      </div>
+      <div class="selected-hint" id="selected-hint">
+        <span id="hint-text"></span>
+        <button class="reselect-btn" onclick="clearSelection()">取消选择</button>
+      </div>
+      <div class="dye-intro" id="dye-intro">
+        <p>以下染发样例仅供参考，实际效果因发质、底色而异。</p>
+        <p style="margin-top:8px;">支持<strong>交互式染发</strong>：到店提供您心仪的图片或视频，葡萄将根据您的发质与需求量身定制专属发色。</p>
+      </div>
+      <div id="male-works" class="works-grid"></div>
+      <div id="female-works" class="works-grid" style="display:none;"></div>
+      <div id="dye-works" class="works-grid" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ===== 第三层：预约服务 ===== -->
+  <div id="book-page" class="page detail-page">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="detail-title">预约服务</div>
+    </div>
+    <div class="detail-body">
+      <div class="selected-style-card" id="book-style-card">
+        <span id="book-style-text"></span>
+        <button class="reselect-btn" onclick="goToWorks()">重新选择</button>
+      </div>
+
+      <form class="book-form" onsubmit="submitBooking(event)">
+        <div class="form-group">
+          <label class="form-label">姓名 *</label>
+          <input type="text" class="form-input" id="book-name" required placeholder="请输入您的姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">电话 *</label>
+          <input type="tel" class="form-input" id="book-phone" required placeholder="请输入联系电话">
+        </div>
+        <div class="form-group">
+          <label class="form-label">已选发型参考</label>
+          <input type="text" class="form-input" id="book-hairstyle" readonly placeholder="未选择，建议先到作品页选择参考发型">
+        </div>
+        <div class="form-group">
+          <label class="form-label">服务项目 *</label>
+          <select class="form-select" id="book-service" required>
+            <option value="">请选择服务项目</option>
+            <option value="洗剪吹-基础档">洗剪吹 - 基础档</option>
+            <option value="洗剪吹-进阶档">洗剪吹 - 进阶档</option>
+            <option value="洗剪吹-高端档">洗剪吹 - 高端档</option>
+            <option value="烫发-基础档">烫发 - 基础档</option>
+            <option value="烫发-进阶档">烫发 - 进阶档</option>
+            <option value="烫发-高端档">烫发 - 高端档</option>
+            <option value="染发-基础档">染发 - 基础档</option>
+            <option value="染发-进阶档">染发 - 进阶档</option>
+            <option value="染发-高端档">染发 - 高端档</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">期望日期 *</label>
+          <input type="date" class="form-input" id="book-date" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">期望时段 *</label>
+          <select class="form-select" id="book-time" required>
+            <option value="">请选择时段</option>
+            <option value="上午10-12点">上午 10-12点</option>
+            <option value="中午12-14点">中午 12-14点</option>
+            <option value="下午14-17点">下午 14-17点</option>
+            <option value="晚上17-20点">晚上 17-20点</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">备注</label>
+          <textarea class="form-textarea" id="book-note" placeholder="请描述发质情况或特殊需求"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">提交预约</button>
+      </form>
+
+      <div class="admin-entry">
+        <button class="admin-link" onclick="showPasswordModal()">主理人入口</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 预约记录页（商家查看） ===== -->
+  <div id="records-page" class="page detail-page records-page">
+    <div class="detail-header">
+      <button class="back-btn" onclick="goToPage('book-page')">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="detail-title">预约记录</div>
+    </div>
+    <div class="detail-body">
+      <div class="records-actions">
+        <button class="action-btn" onclick="goToPage('book-page')">返回预约页</button>
+        <button class="action-btn danger" onclick="clearAllRecords()">清空所有记录</button>
+      </div>
+      <div id="records-list"></div>
+    </div>
+  </div>
+
+  <!-- ===== 密码弹窗 ===== -->
+  <div id="password-modal" class="modal-overlay" onclick="if(event.target===this)closePasswordModal()">
+    <div class="modal-box">
+      <div class="modal-title">主理人验证</div>
+      <input type="password" class="password-input" id="password-input" placeholder="请输入密码" maxlength="4">
+      <button class="modal-btn" onclick="checkPassword()">确认</button>
+    </div>
+  </div>
+
+  <!-- ===== 成功提示弹窗 ===== -->
+  <div id="success-modal" class="modal-overlay" onclick="if(event.target===this)closeSuccessModal()">
+    <div class="modal-box">
+      <div class="modal-title">预约提交成功</div>
+      <div class="modal-text">主理人葡萄会尽快联系您确认时间。</div>
+      <button class="modal-btn" onclick="closeSuccessModal()">好的</button>
+    </div>
+  </div>
+
+  <!-- ===== 轻提示 ===== -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    /* ============================================
+       【商家信息】在此修改联系信息
+       ============================================ */
+    const SHOP_NAME = '大金·FREE Studio';
+    const OWNER_NAME = '葡萄';
+    const PHONE = '18364708336';
+    const WECHAT = 'J1998789';
+    const ADDRESS = '龙城时代大厦14楼1410';
+    const BIO = '葡萄独立经营本工作室，从沟通到操作全程亲自完成，不转手。工作求精不求快，每日限量接待。营业时间随预约灵活安排，建议提前1天预约确认。';
+
+    /* ============================================
+       【价格配置】在此修改价格
+       ============================================ */
+    const PRICES = {
+      cut: [100, 300, 500],
+      perm: [100, 300, 500],
+      dye: [100, 300, 500]
+    };
+
+    /* ============================================
+       【商家密码】在此修改查看密码
+       ============================================ */
+    const ADMIN_PASSWORD = '1410';
+
+    /* ============================================
+       【男士发型】10款（9款样例 + 1款交互式减法）
+       图片路径：images/nan-shi-1.jpg ~ nan-shi-10.jpg
+       ============================================ */
+    const MALE_STYLES = [
+      { name: '羊毛卷', img: 'images/nan-shi-1.jpg' },
+      { name: '前刺短发', img: 'images/nan-shi-2.jpg' },
+      { name: '渐变油头', img: 'images/nan-shi-3.jpg' },
+      { name: '纹理烫', img: 'images/nan-shi-4.jpg' },
+      { name: '韩式服帖烫', img: 'images/nan-shi-5.jpg' },
+      { name: '钢夹烫', img: 'images/nan-shi-6.jpg' },
+      { name: '微分碎盖', img: 'images/nan-shi-7.jpg' },
+      { name: '摩根烫', img: 'images/nan-shi-8.jpg' },
+      { name: '韩式气垫烫', img: 'images/nan-shi-9.jpg' },
+      { name: '交互式减法', img: 'images/nan-shi-10.jpg', isInteractive: true }
+    ];
+
+    /* ============================================
+       【女士发型】10款（9款样例 + 1款交互式减法）
+       图片路径：images/nv-shi-1.jpg ~ nv-shi-10.jpg
+       ============================================ */
+    const FEMALE_STYLES = [
+      { name: '大波浪', img: 'images/nv-shi-1.jpg' },
+      { name: '法式慵懒烫', img: 'images/nv-shi-2.jpg' },
+      { name: '锁骨发', img: 'images/nv-shi-3.jpg' },
+      { name: '挂耳染', img: 'images/nv-shi-4.jpg' },
+      { name: '羊毛卷', img: 'images/nv-shi-5.jpg' },
+      { name: '高层次剪发', img: 'images/nv-shi-6.jpg' },
+      { name: '水母头', img: 'images/nv-shi-7.jpg' },
+      { name: '巴黎画染', img: 'images/nv-shi-8.jpg' },
+      { name: '一刀切短发', img: 'images/nv-shi-9.jpg' },
+      { name: '交互式减法', img: 'images/nv-shi-10.jpg', isInteractive: true }
+    ];
+
+    /* ============================================
+       【染发发型】12款（11款样例 + 1款交互式染发）
+       图片路径：images/ran-fa-1.jpg ~ ran-fa-12.jpg
+       ============================================ */
+    const DYE_STYLES = [
+      { name: '黑茶色', img: 'images/ran-fa-1.jpg' },
+      { name: '冷棕色', img: 'images/ran-fa-2.jpg' },
+      { name: '奶茶色', img: 'images/ran-fa-3.jpg' },
+      { name: '蜜糖棕', img: 'images/ran-fa-4.jpg' },
+      { name: '青木灰', img: 'images/ran-fa-5.jpg' },
+      { name: '蓝黑色', img: 'images/ran-fa-6.jpg' },
+      { name: '粉棕色', img: 'images/ran-fa-7.jpg' },
+      { name: '亚麻金', img: 'images/ran-fa-8.jpg' },
+      { name: '树莓红', img: 'images/ran-fa-9.jpg' },
+      { name: '雾感灰棕', img: 'images/ran-fa-10.jpg' },
+      { name: '紫灰色', img: 'images/ran-fa-11.jpg' },
+      { name: '交互式染发', img: 'images/ran-fa-12.jpg', isInteractive: true }
+    ];
+
+    // ===== 页面切换系统 =====
+    let currentPage = 'cover-page';
+
+    function goToPage(pageId) {
+      const from = document.getElementById(currentPage);
+      const to = document.getElementById(pageId);
+      if (!to) return;
+
+      if (from && from !== to) {
+        from.classList.remove('active');
+        from.classList.add('exit');
+        setTimeout(() => from.classList.remove('exit'), 500);
+      }
+
+      to.classList.remove('exit');
+      to.classList.add('active');
+      currentPage = pageId;
+
+      // 页面专属初始化
+      if (pageId === 'works-page') initWorksPage();
+      if (pageId === 'book-page') initBookPage();
+      if (pageId === 'records-page') renderRecords();
+    }
+
+    function goHome() { goToPage('home-page'); }
+
+    // 封面页点击
+    document.getElementById('cover-page').addEventListener('click', () => {
+      goToPage('home-page');
+    });
+
+    // 主页方块点击
+    document.querySelectorAll('.home-block').forEach(block => {
+      block.addEventListener('click', function() {
+        this.style.transform = 'scale(0.96)';
+        setTimeout(() => {
+          this.style.transform = '';
+          goToPage(this.dataset.target);
+        }, 150);
+      });
+    });
+
+    // 封面加载动画
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('cover-page').classList.add('loaded');
+      }, 100);
+    });
+
+    // ===== 工具函数 =====
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function copyWechat(btn) {
+      navigator.clipboard.writeText(WECHAT).then(() => {
+        btn.textContent = '已复制';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(() => {
+        const input = document.createElement('input');
+        input.value = WECHAT;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        btn.textContent = '已复制';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // ===== 作品展示页逻辑 =====
+    function initWorksPage() {
+      // 每次进入作品页都重置为三大入口选择界面
+      document.getElementById('works-selector').style.display = 'flex';
+      document.getElementById('works-content').style.display = 'none';
+    }
+
+    function enterWorks(type) {
+      document.getElementById('works-selector').style.display = 'none';
+      document.getElementById('works-content').style.display = 'block';
+      switchTab(type);
+    }
+
+    function switchTab(type) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === type);
+      });
+      document.getElementById('male-works').style.display = type === 'male' ? 'grid' : 'none';
+      document.getElementById('female-works').style.display = type === 'female' ? 'grid' : 'none';
+      document.getElementById('dye-works').style.display = type === 'dye' ? 'grid' : 'none';
+      document.getElementById('dye-intro').classList.toggle('show', type === 'dye');
+      updateSelectedHint();
+    }
+
+    function renderWorks() {
+      const maleGrid = document.getElementById('male-works');
+      const femaleGrid = document.getElementById('female-works');
+      const dyeGrid = document.getElementById('dye-works');
+      const selected = localStorage.getItem('selectedHairstyle');
+
+      maleGrid.innerHTML = MALE_STYLES.map(s => createWorkCard(s, selected)).join('');
+      femaleGrid.innerHTML = FEMALE_STYLES.map(s => createWorkCard(s, selected)).join('');
+      dyeGrid.innerHTML = DYE_STYLES.map(s => createWorkCard(s, selected)).join('');
+
+      // 绑定图片加载
+      document.querySelectorAll('.work-img img').forEach(img => {
+        if (img.complete) img.classList.add('loaded');
+        else {
+          img.onload = () => img.classList.add('loaded');
+          img.onerror = () => { /* 保持隐藏，显示占位图 */ };
+        }
+      });
+    }
+
+    function createWorkCard(style, selected) {
+      const isSel = selected === style.name;
+      const isInteractive = style.isInteractive;
+      const placeholderClass = isInteractive ? 'img-placeholder interactive' : 'img-placeholder';
+      const placeholderContent = isInteractive 
+        ? `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>到店提供参考图/视频<br>由葡萄量身定制</span>`
+        : `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>暂无图片</span>`;
+      
+      return `
+        <div class="work-card">
+          <div class="work-img">
+            <div class="${placeholderClass}">
+              ${placeholderContent}
+            </div>
+            <img src="${style.img}" alt="${style.name}" loading="lazy">
+          </div>
+          <div class="work-info">
+            <span class="work-name">${style.name}</span>
+            <button class="select-btn ${isSel ? 'selected' : ''}" onclick="toggleSelect('${style.name}', this)">
+              ${isSel ? '已选择' : '选为参考'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleSelect(name, btn) {
+      const current = localStorage.getItem('selectedHairstyle');
+      if (current === name) {
+        localStorage.removeItem('selectedHairstyle');
+        btn.textContent = '选为参考';
+        btn.classList.remove('selected');
+      } else {
+        localStorage.setItem('selectedHairstyle', name);
+        document.querySelectorAll('.select-btn').forEach(b => {
+          const isTarget = b === btn;
+          b.textContent = isTarget ? '已选择' : '选为参考';
+          b.classList.toggle('selected', isTarget);
+        });
+      }
+      updateSelectedHint();
+      showToast(current === name ? '已取消选择' : `已选择：${name}`);
+    }
+
+    function updateSelectedHint() {
+      const hint = document.getElementById('selected-hint');
+      const text = document.getElementById('hint-text');
+      const selected = localStorage.getItem('selectedHairstyle');
+      if (selected) {
+        text.textContent = `您已选择参考：${selected}`;
+        hint.classList.add('show');
+      } else {
+        hint.classList.remove('show');
+      }
+    }
+
+    function clearSelection() {
+      localStorage.removeItem('selectedHairstyle');
+      document.querySelectorAll('.select-btn').forEach(b => {
+        b.textContent = '选为参考';
+        b.classList.remove('selected');
+      });
+      updateSelectedHint();
+      showToast('已取消选择');
+    }
+
+    // 初始化作品渲染
+    renderWorks();
+
+    // ===== 预约页逻辑 =====
+    function initBookPage() {
+      const selected = localStorage.getItem('selectedHairstyle');
+      const card = document.getElementById('book-style-card');
+      const input = document.getElementById('book-hairstyle');
+      
+      if (selected) {
+        document.getElementById('book-style-text').textContent = `您选择的发型参考：${selected}`;
+        card.classList.add('show');
+        input.value = selected;
+      } else {
+        card.classList.remove('show');
+        input.value = '';
+      }
+    }
+
+    function goToWorks() {
+      goToPage('works-page');
+    }
+
+    function submitBooking(e) {
+      e.preventDefault();
+      const booking = {
+        name: document.getElementById('book-name').value.trim(),
+        phone: document.getElementById('book-phone').value.trim(),
+        hairstyle: document.getElementById('book-hairstyle').value || '未选择',
+        service: document.getElementById('book-service').value,
+        date: document.getElementById('book-date').value,
+        time: document.getElementById('book-time').value,
+        note: document.getElementById('book-note').value.trim(),
+        submitTime: new Date().toLocaleString('zh-CN')
+      };
+
+      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      bookings.push(booking);
+      localStorage.setItem('bookings', JSON.stringify(bookings));
+
+      document.getElementById('success-modal').classList.add('show');
+      e.target.reset();
+      document.getElementById('book-style-card').classList.remove('show');
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('success-modal').classList.remove('show');
+      goHome();
+    }
+
+    // ===== 商家入口 =====
+    function showPasswordModal() {
+      document.getElementById('password-modal').classList.add('show');
+      document.getElementById('password-input').value = '';
+      setTimeout(() => document.getElementById('password-input').focus(), 100);
+    }
+
+    function closePasswordModal() {
+      document.getElementById('password-modal').classList.remove('show');
+    }
+
+    function checkPassword() {
+      const input = document.getElementById('password-input').value;
+      if (input === ADMIN_PASSWORD) {
+        closePasswordModal();
+        goToPage('records-page');
+      } else {
+        showToast('密码错误');
+        document.getElementById('password-input').value = '';
+      }
+    }
+
+    document.getElementById('password-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    // ===== 预约记录页 =====
+    function renderRecords() {
+      const list = document.getElementById('records-list');
+      let bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      
+      // 按期望日期降序排序（最近的日期排在最上面）
+      bookings.sort((a, b) => {
+        const dateA = new Date(a.date + 'T00:00:00');
+        const dateB = new Date(b.date + 'T00:00:00');
+        return dateB - dateA;
+      });
+      
+      if (bookings.length === 0) {
+        list.innerHTML = '<div class="empty-state">暂无预约记录</div>';
+        return;
+      }
+      
+      // 统计相同日期的数量
+      const dateCount = {};
+      bookings.forEach(b => { dateCount[b.date] = (dateCount[b.date] || 0) + 1; });
+      
+      list.innerHTML = bookings.map((b) => {
+        const hasDuplicate = dateCount[b.date] > 1;
+        const duplicateClass = hasDuplicate ? 'duplicate-date' : '';
+        const duplicateBadge = hasDuplicate ? '<span class="dup-badge">日期冲突</span>' : '';
+        return `
+          <div class="record-card ${duplicateClass}">
+            ${duplicateBadge}
+            <div class="record-field"><span class="record-label">姓名</span><span class="record-value">${escapeHtml(b.name)}</span></div>
+            <div class="record-field"><span class="record-label">电话</span><span class="record-value">${escapeHtml(b.phone)}</span></div>
+            <div class="record-field"><span class="record-label">发型参考</span><span class="record-value hairstyle">${escapeHtml(b.hairstyle)}</span></div>
+            <div class="record-field"><span class="record-label">服务项目</span><span class="record-value">${escapeHtml(b.service)}</span></div>
+            <div class="record-field"><span class="record-label">期望日期</span><span class="record-value">${escapeHtml(b.date)}</span></div>
+            <div class="record-field"><span class="record-label">期望时段</span><span class="record-value">${escapeHtml(b.time)}</span></div>
+            <div class="record-field"><span class="record-label">备注</span><span class="record-value">${escapeHtml(b.note) || '无'}</span></div>
+            <div class="record-field"><span class="record-label">提交时间</span><span class="record-value" style="font-size:0.8rem; color:#999;">${escapeHtml(b.submitTime)}</span></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function clearAllRecords() {
+      if (!confirm('确定要清空所有预约记录吗？此操作不可恢复。')) return;
+      localStorage.removeItem('bookings');
+      renderRecords();
+      showToast('已清空所有记录');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
